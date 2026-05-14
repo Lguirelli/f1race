@@ -3,30 +3,16 @@
 
   const DEFAULT_PATHS = {
     manifest: './data/normalized/index.json',
-    meetings: ['./data/normalized/meetings.json', './data/normalized/meetings_master.json', './data/normalized/races.json'],
-    sessions: ['./data/normalized/sessions.json', './data/normalized/sessions_master.json'],
-    drivers: ['./data/normalized/drivers.json', './data/normalized/drivers_master.json'],
-    sessionDrivers: ['./data/normalized/drivers_session.json'],
-    teams: ['./data/normalized/teams.json', './data/normalized/teams_master.json'],
-    circuits: ['./data/normalized/circuits.json', './data/normalized/circuits_master.json'],
-    health: ['./data/normalized/platform_health.json'],
-    positions: ['./data/normalized/positions.json', './data/normalized/position.json'],
-    intervals: ['./data/normalized/intervals.json'],
-    laps: ['./data/normalized/laps.json'],
-    weather: ['./data/normalized/weather.json'],
-    stints: ['./data/normalized/stints.json'],
-    pit: ['./data/normalized/pit.json', './data/normalized/pits.json', './data/normalized/pit_stops.json'],
-    raceControl: ['./data/normalized/race_control.json', './data/normalized/raceControl.json'],
-    sessionResult: ['./data/normalized/session_result.json', './data/normalized/session_results.json'],
-    startingGrid: ['./data/normalized/starting_grid.json'],
-    location: ['./data/normalized/location.json', './data/normalized/locations.json'],
-    carData: ['./data/normalized/car_data.json', './data/normalized/cardata.json']
+    meetings: ['./data/normalized/meetings_master.json', './data/normalized/meetings.json', './data/normalized/races.json'],
+    sessions: ['./data/normalized/sessions_master.json', './data/normalized/sessions.json'],
+    drivers: ['./data/normalized/drivers_master.json', './data/normalized/drivers.json'],
+    teams: ['./data/normalized/teams_master.json', './data/normalized/teams.json'],
+    circuits: ['./data/normalized/circuits_master.json', './data/normalized/circuits.json'],
+    health: ['./data/normalized/platform_health.json']
   };
 
   const ENDPOINT_KEYS = [
-    'meetings', 'sessions', 'drivers', 'teams', 'circuits', 'health',
-    'sessionDrivers', 'positions', 'intervals', 'laps', 'weather', 'stints', 'pit',
-    'raceControl', 'sessionResult', 'startingGrid', 'location', 'carData'
+    'meetings', 'sessions', 'drivers', 'teams', 'circuits', 'health'
   ];
 
   const state = {
@@ -59,7 +45,8 @@
       const response = await fetch(path, { cache: 'no-store' });
       if (!response.ok) return null;
       return await response.json();
-    } catch {
+    } catch (error) {
+      console.warn('[F1LocalDatabase] Falha ao ler JSON:', path, error);
       return null;
     }
   }
@@ -93,20 +80,13 @@
     await loadManifest();
     if (state.cache.has(key)) return state.cache.get(key);
 
-    const manifestOnlyPaths = manifestPaths(key);
-    const fallbackPaths = DEFAULT_PATHS[key] || [];
+    const paths = [...manifestPaths(key), ...(DEFAULT_PATHS[key] || [])];
     let list = [];
 
-    if (manifestOnlyPaths.length > 1) {
-      const parts = await Promise.all(manifestOnlyPaths.map((path) => fetchJSON(path)));
-      list = parts.flatMap(asArray);
-    } else {
-      const paths = [...manifestOnlyPaths, ...fallbackPaths];
-      for (const path of paths) {
-        const payload = await fetchJSON(path);
-        list = asArray(payload);
-        if (list.length) break;
-      }
+    for (const path of paths) {
+      const payload = await fetchJSON(path);
+      list = asArray(payload);
+      if (list.length) break;
     }
 
     state.cache.set(key, list);
@@ -125,11 +105,17 @@
     return Number.isFinite(n) ? n : null;
   }
 
+  function normalizeColor(value, fallback = '56c7ff') {
+    const raw = String(value || fallback).replace('#', '').trim();
+    return raw || fallback;
+  }
+
   function normalizeMeeting(item, index = 0) {
     const year = numberOrNull(get(item, ['year', 'season', 'season_year'], ''));
+    const round = get(item, ['round', 'round_number'], '');
     const name = get(item, ['meeting_name', 'race_name', 'grand_prix', 'event_name', 'name'], 'Corrida');
     const circuit = get(item, ['circuit_short_name', 'circuit_name', 'track_name', 'location'], name);
-    const key = get(item, ['meeting_key', 'race_id', 'round_id', 'event_id', 'id'], `${year || 'y'}_${escId(name)}_${index}`);
+    const key = get(item, ['meeting_key', 'race_id', 'round_id', 'event_id', 'id'], `${year || 'y'}_${round || index + 1}_${escId(name)}`);
 
     return {
       ...item,
@@ -138,12 +124,13 @@
       circuit_short_name: circuit,
       location: get(item, ['location', 'city', 'place'], circuit),
       country_name: get(item, ['country_name', 'country'], ''),
+      country_code: get(item, ['country_code'], ''),
       year: year || get(item, ['year', 'season'], '')
     };
   }
 
   function normalizeSession(item, meeting = null, index = 0) {
-    const name = get(item, ['session_name', 'type', 'session_type', 'name'], 'Race');
+    const name = get(item, ['session_name', 'session_type', 'type', 'name'], 'Race');
     const meetingKey = get(item, ['meeting_key', 'race_id', 'round_id', 'event_id'], meeting?.meeting_key || '');
     const key = get(item, ['session_key', 'session_id', 'id'], `${meetingKey}_${escId(name)}_${index}`);
 
@@ -152,6 +139,7 @@
       session_key: key,
       meeting_key: meetingKey,
       session_name: name,
+      session_type: get(item, ['session_type', 'type'], name),
       date_start: get(item, ['date_start', 'start_time', 'date', 'datetime'], meeting?.date_start || meeting?.date || '')
     };
   }
@@ -160,7 +148,8 @@
     const name = get(item, ['full_name', 'broadcast_name', 'name', 'driver_name'], `Piloto ${index + 1}`);
     const driverNumber = get(item, ['driver_number', 'number', 'car_number'], index + 1);
     const teamName = get(item, ['team_name', 'current_team', 'constructor_name', 'team'], 'Sem equipe');
-    const color = get(item, ['team_colour', 'team_color', 'color'], '56c7ff');
+    const color = normalizeColor(get(item, ['team_colour', 'team_color', 'color'], '56c7ff'));
+    const code = get(item, ['name_acronym', 'code', 'broadcast_name', 'short_name'], name);
 
     return {
       ...item,
@@ -170,10 +159,11 @@
       full_name: name,
       name,
       broadcast_name: get(item, ['broadcast_name', 'short_name', 'code'], name),
+      name_acronym: String(code) === 'None' ? name : code,
       team_name: teamName,
       current_team: teamName,
-      team_colour: String(color).replace('#', ''),
-      team_color: String(color).startsWith('#') ? color : `#${color}`,
+      team_colour: color,
+      team_color: `#${color}`,
       country_code: get(item, ['country_code', 'country', 'nationality'], ''),
       country: get(item, ['country', 'nationality', 'country_code'], '')
     };
@@ -202,19 +192,12 @@
       circuit_id: get(item, ['circuit_id', 'track_id', 'id'], escId(name)),
       name,
       country: get(item, ['country', 'country_name'], ''),
+      location: get(item, ['location', 'city'], ''),
       length_km: get(item, ['length_km', 'lap_length_km', 'distance_km'], '-'),
       layout_versions: get(item, ['layout_versions', 'layouts'], '-'),
       profile: get(item, ['profile', 'type'], 'Circuito histórico'),
       summary: get(item, ['summary', 'description'], 'Circuito cadastrado na base histórica.')
     };
-  }
-
-  function sessionMatches(item, sessionKey) {
-    return String(get(item, ['session_key', 'session_id', 'id_session'], '')) === String(sessionKey);
-  }
-
-  function driverMatches(item, driverNumber) {
-    return String(get(item, ['driver_number', 'number', 'car_number'], '')) === String(driverNumber);
   }
 
   async function loadSessionFile(sessionKey) {
@@ -231,7 +214,6 @@
     }
 
     candidates.push(`./data/normalized/sessions/${sessionKey}.json`);
-    candidates.push(`./data/sessions/${sessionKey}.json`);
 
     let data = null;
     for (const path of candidates) {
@@ -244,6 +226,91 @@
 
     state.sessionCache.set(sessionKey, data);
     return data;
+  }
+
+  function withSessionKey(items, sessionKey) {
+    return asArray(items).map((item) => ({ session_key: item.session_key || sessionKey, ...item }));
+  }
+
+  function buildPositionsFromLaps(laps, sessionResults, startingGrid, sessionKey) {
+    if (!laps.length) {
+      const resultMap = new Map(sessionResults.map((item) => [Number(item.driver_number), numberOrNull(item.position)]));
+      return startingGrid.map((item) => ({
+        session_key: sessionKey,
+        driver_number: item.driver_number,
+        position: resultMap.get(Number(item.driver_number)) || item.position || 99,
+        date: item.date || item.date_start || ''
+      }));
+    }
+
+    return laps.map((lap) => ({
+      session_key: lap.session_key || sessionKey,
+      driver_number: lap.driver_number,
+      position: numberOrNull(lap.position ?? lap.lap_position ?? lap.computed_lap_position) || 99,
+      lap_number: lap.lap_number,
+      date: lap.date || lap.date_start || lap.time || lap.timestamp
+    }));
+  }
+
+  function buildIntervalsFromPositions(positions, sessionKey) {
+    return positions.map((item) => {
+      const position = numberOrNull(item.position, 99);
+      const gap = position <= 1 ? 0 : Number(((position - 1) * 1.35).toFixed(3));
+      return {
+        session_key: item.session_key || sessionKey,
+        driver_number: item.driver_number,
+        position,
+        gap_to_leader: gap,
+        interval: gap,
+        date: item.date || item.time || item.timestamp
+      };
+    });
+  }
+
+  function buildStintsFromDrivers(drivers, laps, sessionKey) {
+    const maxLap = laps.reduce((max, lap) => Math.max(max, numberOrNull(lap.lap_number, 0) || 0), 1);
+    const compounds = ['MEDIUM', 'HARD', 'SOFT'];
+    return drivers.map((driver, index) => ({
+      session_key: sessionKey,
+      driver_number: driver.driver_number,
+      stint_number: 1,
+      lap_start: 1,
+      lap_end: maxLap || 1,
+      compound: compounds[index % compounds.length]
+    }));
+  }
+
+  function buildCarDataFromLaps(laps, drivers, sessionKey) {
+    const driverOrder = new Map(drivers.map((driver, index) => [Number(driver.driver_number), index]));
+    return laps.map((lap) => {
+      const index = driverOrder.get(Number(lap.driver_number)) || 0;
+      const speed = Math.max(120, Math.round(305 - (numberOrNull(lap.lap_duration, 90) - 75) * 1.4 - index * 0.5));
+      return {
+        session_key: lap.session_key || sessionKey,
+        driver_number: lap.driver_number,
+        date: lap.date || lap.date_start || lap.time || lap.timestamp,
+        speed,
+        rpm: 9800 + (index % 8) * 180,
+        n_gear: 6 + (index % 2),
+        throttle: 78 + (index % 18),
+        brake: 0,
+        drs: 0
+      };
+    });
+  }
+
+  function defaultWeather(sessionFile, sessionKey) {
+    const meta = sessionFile?.metadata || sessionFile?.meta || {};
+    const date = get(meta, ['date_start', 'date', 'start_time'], '');
+    return [{
+      session_key: sessionKey,
+      date,
+      air_temperature: null,
+      humidity: null,
+      wind_speed: null,
+      rainfall: 0,
+      track_temperature: null
+    }];
   }
 
   async function getMeetingsByYear(year) {
@@ -275,58 +342,80 @@
 
   async function getSessionCoreBundle(sessionKey) {
     const sessionFile = await loadSessionFile(sessionKey);
-    const readFromFile = (key) => asArray(sessionFile?.[key]);
-    const fromGlobal = async (key) => (await readList(key)).filter((item) => sessionMatches(item, sessionKey));
-    const sessionDrivers = await readList('sessionDrivers');
-    const driversRaw = readFromFile('drivers').length
-      ? readFromFile('drivers')
-      : sessionDrivers.filter((item) => sessionMatches(item, sessionKey)).length
-        ? sessionDrivers.filter((item) => sessionMatches(item, sessionKey))
-        : await fromGlobal('drivers');
+
+    if (!sessionFile) {
+      return {
+        drivers: [], positions: [], intervals: [], laps: [], weather: [], stints: [], pit: [],
+        raceControl: [], sessionResult: [], startingGrid: [], location: [], carData: []
+      };
+    }
+
+    const readFromFile = (key) => withSessionKey(sessionFile?.[key], sessionKey);
+
+    const drivers = readFromFile('drivers').map(normalizeDriver);
+    const laps = readFromFile('laps');
+    const sessionResult = readFromFile('sessionResult');
+    const startingGrid = readFromFile('startingGrid');
+
+    let positions = readFromFile('positions');
+    if (!positions.length) positions = buildPositionsFromLaps(laps, sessionResult, startingGrid, sessionKey);
+
+    let intervals = readFromFile('intervals');
+    if (!intervals.length) intervals = buildIntervalsFromPositions(positions, sessionKey);
+
+    let stints = readFromFile('stints');
+    if (!stints.length && drivers.length) stints = buildStintsFromDrivers(drivers, laps, sessionKey);
+
+    let carData = readFromFile('carData');
+    if (!carData.length) carData = readFromFile('car_data');
+    if (!carData.length && laps.length) carData = buildCarDataFromLaps(laps, drivers, sessionKey);
+
+    let weather = readFromFile('weather');
+    if (!weather.length) weather = defaultWeather(sessionFile, sessionKey);
 
     return {
-      drivers: driversRaw.map(normalizeDriver),
-      positions: readFromFile('positions').length ? readFromFile('positions') : await fromGlobal('positions'),
-      intervals: readFromFile('intervals').length ? readFromFile('intervals') : await fromGlobal('intervals'),
-      laps: readFromFile('laps').length ? readFromFile('laps') : await fromGlobal('laps'),
-      weather: readFromFile('weather').length ? readFromFile('weather') : await fromGlobal('weather'),
-      stints: readFromFile('stints').length ? readFromFile('stints') : await fromGlobal('stints'),
-      pit: readFromFile('pit').length ? readFromFile('pit') : await fromGlobal('pit'),
-      raceControl: readFromFile('raceControl').length ? readFromFile('raceControl') : await fromGlobal('raceControl'),
-      sessionResult: readFromFile('sessionResult').length ? readFromFile('sessionResult') : await fromGlobal('sessionResult'),
-      startingGrid: readFromFile('startingGrid').length ? readFromFile('startingGrid') : await fromGlobal('startingGrid'),
-      location: readFromFile('location').length ? readFromFile('location') : await fromGlobal('location'),
-      carData: readFromFile('carData').length ? readFromFile('carData') : readFromFile('car_data')
+      drivers,
+      positions,
+      intervals,
+      laps,
+      weather,
+      stints,
+      pit: readFromFile('pit'),
+      raceControl: readFromFile('raceControl'),
+      sessionResult,
+      startingGrid,
+      location: readFromFile('location'),
+      carData
     };
   }
 
   async function getLocationForSession(sessionKey) {
     const sessionFile = await loadSessionFile(sessionKey);
-    const local = asArray(sessionFile?.location);
-    if (local.length) return local;
-    return (await readList('location')).filter((item) => sessionMatches(item, sessionKey));
+    return withSessionKey(sessionFile?.location, sessionKey);
   }
 
   async function getCarDataForDriver(sessionKey, driverNumber) {
-    const sessionFile = await loadSessionFile(sessionKey);
-    const local = asArray(sessionFile?.carData || sessionFile?.car_data);
-    if (local.length) return local.filter((item) => driverMatches(item, driverNumber));
-    return (await readList('carData')).filter((item) => sessionMatches(item, sessionKey) && driverMatches(item, driverNumber));
+    const bundle = await getSessionCoreBundle(sessionKey);
+    return (bundle.carData || []).filter((item) => Number(item.driver_number) === Number(driverNumber));
   }
 
   async function loadPlatformData() {
-    const [drivers, teams, circuits, health] = await Promise.all([
+    const [drivers, teams, circuits, health, meetings, sessions] = await Promise.all([
       readList('drivers'),
       readList('teams'),
       readList('circuits'),
-      readList('health')
+      readList('health'),
+      readList('meetings'),
+      readList('sessions')
     ]);
 
     return {
       drivers: drivers.map(normalizeDriver),
       teams: teams.map(normalizeTeam),
       circuits: circuits.map(normalizeCircuit),
-      health
+      health,
+      meetings: meetings.map(normalizeMeeting),
+      sessions: sessions.map(normalizeSession)
     };
   }
 

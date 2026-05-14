@@ -15,35 +15,55 @@
   function renderDashboard() {
     const d = state.data;
     const grid = $('#dashboard-season-grid');
+    const years = d.meetings.map((item) => Number(item.year)).filter(Number.isFinite);
+    const minYear = years.length ? Math.min(...years) : 1950;
+    const maxYear = years.length ? Math.max(...years) : 2026;
+
     if (grid) grid.innerHTML = [
-      metric('Pilotos', d.drivers.length, 'cards disponíveis'),
-      metric('Equipes', d.teams.length, 'cadastros normalizados'),
-      metric('Circuitos', d.circuits.length, 'layouts e metadados'),
-      metric('Base', '1950-2026', 'estrutura preparada')
+      metric('Corridas', d.meetings.length || '-', `${minYear}-${maxYear}`),
+      metric('Sessões', d.sessions.length || '-', 'arquivos conectados'),
+      metric('Pilotos', d.drivers.length || '-', 'cadastros normalizados'),
+      metric('Equipes', d.teams.length || '-', 'construtores históricos'),
+      metric('Circuitos', d.circuits.length || '-', 'layouts e metadados'),
+      metric('Base', `${minYear}-${maxYear}`, 'sem chamada externa')
     ].join('');
 
     const races = $('#dashboard-featured-races');
-    if (races) races.innerHTML = [
-      'Replay histórico com mapa vetorial',
-      'Galeria de pilotos com estilo de pilotagem',
-      'Comparadores de pilotos, equipes e circuitos',
-      'Simulador de cenários alternativos'
-    ].map((item) => `<article><b>◎</b><span>${item}</span></article>`).join('');
+    if (races) {
+      const latest = [...d.meetings]
+        .sort((a, b) => Number(b.year || 0) - Number(a.year || 0) || Number(b.round || 0) - Number(a.round || 0))
+        .slice(0, 8);
+      races.innerHTML = latest.map((item) => `<article><b>◎</b><span>${esc(item.year)} · ${esc(item.meeting_name || item.name)} · ${esc(item.circuit_short_name || item.location || '')}</span></article>`).join('')
+        || '<article><b>◎</b><span>Nenhuma corrida encontrada na base.</span></article>';
+    }
 
     const health = $('#dashboard-data-health');
-    if (health) health.innerHTML = d.health.map((item) => `<article class="health-card"><strong>${esc(item.label)}</strong><span>${esc(item.status)}</span><small>${esc(item.detail)}</small></article>`).join('');
+    if (health) health.innerHTML = d.health.map((item) => `<article class="health-card"><strong>${esc(item.label)}</strong><span>${esc(item.value ?? item.status ?? '-')}</span><small>${esc(item.detail || '')}</small></article>`).join('');
   }
 
   function driverCard(driver) {
     const c = color(driver.team_color);
-    const tags = (driver.style_tags || []).slice(0, 4).map((tag) => `<span>${esc(tag)}</span>`).join('');
     const idx = driver.indexes || {};
+    const tags = (driver.style_tags || []).slice(0, 4).map((tag) => `<span>${esc(tag)}</span>`).join('');
+    const starts = driver.starts ?? driver.race_starts ?? '-';
+    const wins = driver.wins ?? '-';
+    const podiums = driver.podiums ?? '-';
+
     return `<article class="driver-number-card" style="--team-color:${c}" data-driver-id="${esc(driver.driver_id)}">
       <div class="driver-bg-number">${esc(driver.number || '-')}</div>
       <div class="driver-card-top"><span class="driver-flag">🏁</span><b>#${esc(driver.number || '-')}</b></div>
-      <div class="driver-card-main"><h3>${esc(driver.name)}</h3><p>${esc(driver.current_team || 'Equipe não informada')}</p></div>
+      <div class="driver-card-main"><h3>${esc(driver.name)}</h3><p>${esc(driver.current_team || driver.team_name || 'Equipe não informada')}</p></div>
       <div class="driver-tags">${tags}</div>
-      <div class="driver-index-row"><span>Consistência <b>${esc(idx.consistency ?? '-')}</b></span><span>Ritmo <b>${esc(idx.race_pace ?? '-')}</b></span><span>Quali <b>${esc(idx.qualifying ?? '-')}</b></span></div>
+      <div class="driver-index-row">
+        <span>Corridas <b>${esc(starts)}</b></span>
+        <span>Vitórias <b>${esc(wins)}</b></span>
+        <span>Pódios <b>${esc(podiums)}</b></span>
+      </div>
+      <div class="driver-index-row driver-index-row-secondary">
+        <span>Cons. <b>${esc(idx.consistency ?? '-')}</b></span>
+        <span>Ritmo <b>${esc(idx.race_pace ?? '-')}</b></span>
+        <span>Quali <b>${esc(idx.qualifying ?? '-')}</b></span>
+      </div>
     </article>`;
   }
 
@@ -51,15 +71,19 @@
     const panel = $('#driver-detail-panel');
     if (!panel) return;
     const idx = driver.indexes || {};
+    const indexLabels = { consistency: 'Consistência', race_pace: 'Ritmo de corrida', qualifying: 'Classificação' };
+
     panel.innerHTML = `<span class="page-kicker">Perfil do piloto</span><h3>${esc(driver.name || 'Selecione um piloto')}</h3><p>${esc(driver.style_summary || 'Clique em um card para ver a leitura completa.')}</p>
       <div class="profile-stats">
         ${metric('Títulos', driver.titles ?? '-', driver.years_active || '')}
-        ${metric('Vitórias', driver.wins ?? '-', 'carreira')}
-        ${metric('Poles', driver.poles ?? '-', 'classificação')}
+        ${metric('Corridas', driver.starts ?? '-', `${driver.seasons ?? '-'} temporadas`)}
+        ${metric('Vitórias', driver.wins ?? '-', `${driver.points ?? '-'} pontos`)}
         ${metric('Pódios', driver.podiums ?? '-', 'resultados')}
+        ${metric('Poles', driver.poles ?? '-', 'classificação')}
+        ${metric('Média chegada', driver.avg_finish ?? '-', 'posição final')}
       </div>
       <div class="style-bars">
-        ${Object.entries(idx).map(([k, v]) => `<label><span>${esc(k)}</span><i><em style="width:${Number(v) || 0}%"></em></i><b>${esc(v)}</b></label>`).join('')}
+        ${Object.entries(idx).map(([k, v]) => `<label><span>${esc(indexLabels[k] || k)}</span><i><em style="width:${Number(v) || 0}%"></em></i><b>${esc(v)}</b></label>`).join('')}
       </div>`;
   }
 
@@ -71,10 +95,23 @@
 
     const query = String(search?.value || '').toLowerCase();
     const status = filter?.value || 'all';
+    const maxYear = Math.max(...state.data.drivers.map((driver) => Number(driver.year || 0)).filter(Number.isFinite), 0);
+    const championNames = new Set(['Juan Manuel Fangio', 'Alberto Ascari', 'Jack Brabham', 'Graham Hill', 'Jim Clark', 'Jackie Stewart', 'Niki Lauda', 'James Hunt', 'Mario Andretti', 'Jody Scheckter', 'Alan Jones', 'Nelson Piquet', 'Keke Rosberg', 'Alain Prost', 'Ayrton Senna', 'Nigel Mansell', 'Michael Schumacher', 'Damon Hill', 'Jacques Villeneuve', 'Mika Hakkinen', 'Fernando Alonso', 'Kimi Raikkonen', 'Lewis Hamilton', 'Jenson Button', 'Sebastian Vettel', 'Nico Rosberg', 'Max Verstappen']);
+
     const drivers = state.data.drivers.filter((driver) => {
-      const haystack = [driver.name, driver.country, driver.current_team, driver.status, ...(driver.style_tags || [])].join(' ').toLowerCase();
-      const statusOk = status === 'all' || String(driver.status || '').includes(status);
+      const haystack = [driver.name, driver.country, driver.current_team, driver.status, driver.year, driver.years_active, ...(driver.style_tags || [])].join(' ').toLowerCase();
+      const isActive = driver.status_category === 'active' || (maxYear && Number(driver.year || 0) >= maxYear - 1);
+      const isChampion = championNames.has(driver.name) || Number(driver.titles || 0) > 0;
+      const statusOk = status === 'all'
+        || (status === 'active' && isActive)
+        || (status === 'historical' && !isActive)
+        || (status === 'champion' && isChampion);
       return statusOk && haystack.includes(query);
+    }).sort((a, b) => {
+      return Number(b.year || 0) - Number(a.year || 0)
+        || Number(b.wins || 0) - Number(a.wins || 0)
+        || Number(b.podiums || 0) - Number(a.podiums || 0)
+        || String(a.name || '').localeCompare(String(b.name || ''));
     });
 
     gallery.innerHTML = drivers.map(driverCard).join('') || '<div class="empty-page-state">Nenhum piloto encontrado.</div>';
@@ -101,14 +138,41 @@
 
   function renderAnalytics() {
     const cmp = $('#analytics-driver-compare');
-    if (cmp) cmp.innerHTML = state.data.drivers.slice(0, 4).map((driver) => metric(driver.name, driver.indexes?.dominance ?? '-', 'índice de dominância')).join('');
+    if (cmp) {
+      const drivers = [...state.data.drivers]
+        .sort((a, b) => Number(a.number || a.driver_number || 999) - Number(b.number || b.driver_number || 999))
+        .slice(0, 8);
+      cmp.innerHTML = drivers.map((driver) => metric(driver.name, driver.current_team || '-', `ano base ${driver.year || '-'}`)).join('');
+    }
+
     const list = $('#analytics-index-list');
-    if (list) list.innerHTML = ['Consistência', 'Agressividade', 'Dominância', 'Ritmo de corrida', 'Classificação', 'Habilidade na chuva'].map((x) => `<article><b>◉</b><span>${x}</span></article>`).join('');
+    if (list) {
+      const byYear = state.data.meetings.reduce((acc, item) => {
+        const year = item.year || 'Sem ano';
+        acc[year] = (acc[year] || 0) + 1;
+        return acc;
+      }, {});
+      const topYears = Object.entries(byYear)
+        .sort((a, b) => Number(b[0]) - Number(a[0]))
+        .slice(0, 8);
+      list.innerHTML = topYears.map(([year, count]) => `<article><b>◉</b><span>${esc(year)} · ${esc(count)} corridas conectadas</span></article>`).join('');
+    }
   }
 
   function renderSimulation() {
     const el = $('#simulation-results');
-    if (el) el.innerHTML = ['Probabilidade de vitória', 'Delta de estratégia', 'Impacto de safety car', 'Ritmo projetado'].map((x, i) => metric(x, `${72 - i * 9}%`, 'simulação placeholder')).join('');
+    if (!el) return;
+
+    const sessionsWithReplay = state.data.sessions.filter((item) => item.has_simulation || item.recommended_frontend_mode || item.session_key);
+    const estimated = sessionsWithReplay.filter((item) => String(item.recommended_frontend_mode || '').includes('estimated')).length;
+    const realLike = Math.max(0, sessionsWithReplay.length - estimated);
+
+    el.innerHTML = [
+      metric('Sessões prontas', sessionsWithReplay.length || '-', 'carregadas da base local'),
+      metric('Replays estimados', estimated || '-', 'gerados por resultado/voltas'),
+      metric('Replays detalhados', realLike || '-', 'com maior granularidade'),
+      metric('Chamadas externas', '0', 'OpenF1 bloqueada nesta versão')
+    ].join('');
   }
 
 
