@@ -1009,3 +1009,11 @@ body > .floating-page-menu .floating-menu-list {
     width: min(240px, calc(100vw - 20px));
   }
 }
+
+.driver-index-row-secondary {
+  margin-top: 8px;
+}
+
+.driver-index-row-secondary span {
+  min-height: 50px;
+}
