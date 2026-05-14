@@ -1,0 +1,1716 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #030304;
+  --bg-deep: #000000;
+  --panel: rgba(12, 12, 14, 0.82);
+  --panel2: rgba(18, 18, 22, 0.76);
+  --line: rgba(255, 255, 255, 0.1);
+  --line-strong: rgba(255, 255, 255, 0.18);
+
+  --text: #f5f5f7;
+  --muted: rgba(245, 245, 247, 0.58);
+  --muted-strong: rgba(245, 245, 247, 0.74);
+
+  --glow-orange: #ff6a1a;
+  --glow-orange-soft: rgba(255, 106, 26, 0.36);
+  --glow-red: #ff4057;
+  --glow-blue: #56c7ff;
+  --glow-purple: #9b5cff;
+
+  --green: #00d26a;
+  --purple: #b26cff;
+  --yellow: #ffd84d;
+  --red: #ff4057;
+
+  --radius-lg: 28px;
+  --radius-md: 20px;
+  --radius-sm: 14px;
+
+  --shadow-deep:
+    0 26px 90px rgba(0, 0, 0, 0.72),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  --shadow-soft:
+    0 18px 60px rgba(0, 0, 0, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+
+  --glass-bg:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.065),
+      rgba(255, 255, 255, 0.018)
+    );
+
+  --glass-border: rgba(255, 255, 255, 0.12);
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, Arial, sans-serif;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  position: relative;
+  background:
+    radial-gradient(circle at 50% -20%, rgba(255, 106, 26, 0.18), transparent 28%),
+    radial-gradient(circle at 85% 18%, rgba(86, 199, 255, 0.08), transparent 32%),
+    radial-gradient(circle at 10% 82%, rgba(155, 92, 255, 0.1), transparent 34%),
+    linear-gradient(180deg, #070707 0%, #030304 48%, #000000 100%);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.026) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.026) 1px, transparent 1px);
+  background-size: 92px 92px;
+  mask-image: radial-gradient(circle at center, black 0%, transparent 78%);
+  opacity: 0.65;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+  background-size: 8px 8px;
+  opacity: 0.08;
+  mix-blend-mode: screen;
+}
+
+.app-shell {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px;
+}
+
+.app-shell::before {
+  content: "";
+  position: fixed;
+  left: 8%;
+  right: 8%;
+  bottom: -18%;
+  height: 36%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center, rgba(255, 106, 26, 0.32), transparent 64%);
+  filter: blur(38px);
+  opacity: 0.95;
+}
+
+/* =========================================
+   GLOBAL GLASS PANELS
+========================================= */
+
+.panel {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 110%, rgba(255, 106, 26, 0.09), transparent 42%),
+    var(--glass-bg),
+    rgba(9, 9, 11, 0.78);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(18px) saturate(130%);
+  box-shadow: var(--shadow-soft);
+}
+
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.2),
+      transparent 20%,
+      transparent 62%,
+      rgba(255, 106, 26, 0.18)
+    );
+  opacity: 0.48;
+}
+
+.panel::after {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -34px;
+  height: 70px;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(255, 106, 26, 0.26), transparent 68%);
+  filter: blur(22px);
+  opacity: 0.8;
+}
+
+.panel > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* =========================================
+   TOP DASHBOARD
+========================================= */
+
+.top-dashboard {
+  display: grid;
+  grid-template-columns: 0.95fr 1.35fr 0.9fr;
+  gap: 18px;
+  min-height: 132px;
+  padding: 16px;
+  align-items: center;
+}
+
+.brand-panel {
+  padding: 8px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.brand-panel h1 {
+  font-size: clamp(34px, 3vw, 58px);
+  line-height: 0.9;
+  font-weight: 750;
+  letter-spacing: -0.065em;
+  color: #ffffff;
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.12);
+}
+
+.brand-panel p {
+  margin-top: 12px;
+  color: var(--muted);
+  font-weight: 650;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+/* =========================================
+   HISTORY CONTROLS
+========================================= */
+
+.history-panel {
+  padding: 6px 0;
+  display: grid;
+  grid-template-columns: 0.7fr 1.35fr 0.85fr auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.history-control {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.history-control label {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.history-control select,
+#loadHistoryBtn {
+  height: 46px;
+  padding: 0 15px;
+  border-radius: 16px;
+  outline: none;
+  font-size: 13px;
+  font-weight: 750;
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease,
+    opacity 0.25s ease;
+}
+
+.history-control select {
+  width: 100%;
+  appearance: none;
+  color: var(--text);
+  cursor: pointer;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.025)),
+    rgba(6, 8, 12, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    0 14px 34px rgba(0, 0, 0, 0.28);
+}
+
+.history-control select:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 18px 44px rgba(0, 0, 0, 0.36),
+    0 0 24px rgba(255, 106, 26, 0.08);
+}
+
+.history-control select:focus {
+  border-color: rgba(255, 106, 26, 0.72);
+  box-shadow:
+    0 0 0 3px rgba(255, 106, 26, 0.12),
+    0 0 32px rgba(255, 106, 26, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.history-control select:disabled,
+#loadHistoryBtn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+#loadHistoryBtn {
+  border: 1px solid rgba(255, 210, 170, 0.44);
+  min-width: 126px;
+  cursor: pointer;
+  color: #fff;
+  font-weight: 850;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.44), transparent 38%),
+    linear-gradient(180deg, #ff8a3d, #b93612 78%);
+  box-shadow:
+    0 0 28px rgba(255, 106, 26, 0.32),
+    0 14px 34px rgba(255, 106, 26, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32);
+}
+
+#loadHistoryBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 38px rgba(255, 106, 26, 0.48),
+    0 18px 46px rgba(255, 106, 26, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.38);
+}
+
+/* =========================================
+   WEATHER
+========================================= */
+
+.weather-panel {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.weather-panel article {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 50% 120%, rgba(86, 199, 255, 0.1), transparent 60%),
+    rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.075),
+    0 12px 28px rgba(0, 0, 0, 0.24);
+}
+
+.weather-panel b {
+  font-size: 24px;
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.16));
+}
+
+.weather-panel strong {
+  display: block;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.weather-panel span {
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+/* =========================================
+   TOP METRICS
+========================================= */
+
+.top-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 11px;
+  padding: 12px;
+}
+
+.lap-card,
+.sector-card {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 110%, rgba(255, 106, 26, 0.13), transparent 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.095);
+  border-radius: 20px;
+  padding: 15px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 14px 36px rgba(0, 0, 0, 0.28);
+}
+
+.lap-card::after,
+.sector-card::after {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: -20px;
+  height: 36px;
+  background: radial-gradient(ellipse at center, rgba(255, 106, 26, 0.28), transparent 68%);
+  filter: blur(12px);
+  pointer-events: none;
+}
+
+.lap-card span,
+.sector-card span,
+.status-grid small {
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+}
+
+.lap-card strong {
+  display: block;
+  margin-top: 7px;
+  font-size: 36px;
+  line-height: 1;
+  font-weight: 760;
+  letter-spacing: -0.05em;
+}
+
+.sector-card strong {
+  display: block;
+  margin-top: 7px;
+  font-size: 27px;
+  font-weight: 760;
+  letter-spacing: -0.035em;
+}
+
+.sector-card small {
+  display: block;
+  margin-top: 5px;
+  color: rgba(255, 255, 255, 0.52);
+}
+
+.sector-card i {
+  display: block;
+  width: 70%;
+  height: 3px;
+  margin-top: 9px;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0 0 16px currentColor;
+}
+
+.green strong,
+.green-text {
+  color: var(--green);
+  text-shadow: 0 0 22px rgba(0, 210, 106, 0.24);
+}
+
+.purple strong,
+.purple-text,
+.purple {
+  color: var(--purple);
+  text-shadow: 0 0 22px rgba(178, 108, 255, 0.24);
+}
+
+.yellow strong,
+.yellow-text {
+  color: var(--yellow);
+  text-shadow: 0 0 22px rgba(255, 216, 77, 0.22);
+}
+
+/* =========================================
+   MAIN DASHBOARD
+========================================= */
+
+.main-dashboard {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr) 340px;
+  gap: 14px;
+}
+
+.left-column,
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+}
+
+/* =========================================
+   TEAM PANEL
+========================================= */
+
+.team-panel {
+  padding: 17px;
+}
+
+.panel-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.panel-heading span {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  margin-bottom: 5px;
+}
+
+.panel-heading h2 {
+  font-size: 23px;
+  line-height: 1;
+  font-weight: 720;
+  letter-spacing: -0.045em;
+}
+
+.team-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.team-option {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px;
+  border-radius: 15px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.058), rgba(255, 255, 255, 0.018));
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  color: var(--text);
+  font-weight: 760;
+  cursor: pointer;
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    background 0.22s ease,
+    box-shadow 0.22s ease,
+    opacity 0.22s ease;
+}
+
+.team-option::before {
+  content: "";
+  position: absolute;
+  inset: auto 18px -22px 18px;
+  height: 38px;
+  background: radial-gradient(ellipse at center, var(--team-color, transparent), transparent 70%);
+  filter: blur(16px);
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.team-option:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--team-color, #ffffff) 42%, transparent);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.028));
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.32),
+    0 0 24px color-mix(in srgb, var(--team-color, #ffffff) 18%, transparent);
+}
+
+.team-option input {
+  accent-color: var(--team-color, var(--green));
+}
+
+.team-option em {
+  position: relative;
+  z-index: 2;
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  min-width: 24px;
+  width: auto;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  color: #050505;
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 900;
+  background: var(--team-color, var(--green));
+  box-shadow:
+    0 0 16px color-mix(in srgb, var(--team-color, var(--green)) 72%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32);
+}
+
+.all-option em {
+  display: none;
+}
+
+.mode-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-top: 15px;
+}
+
+.mode-switch button,
+#reset-teams {
+  border: 1px solid rgba(255, 255, 255, 0.095);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.022));
+  color: #fff;
+  border-radius: 15px;
+  padding: 11px;
+  cursor: pointer;
+  font-weight: 760;
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    background 0.22s ease;
+}
+
+.mode-switch button:hover,
+#reset-teams:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.mode-switch button.active {
+  background:
+    radial-gradient(circle at 50% 100%, rgba(0, 210, 106, 0.18), transparent 68%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025));
+  color: var(--green);
+  border-color: rgba(0, 210, 106, 0.32);
+  box-shadow:
+    0 0 26px rgba(0, 210, 106, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* =========================================
+   STANDINGS
+========================================= */
+
+.standings-panel {
+  flex: 1;
+  padding: 17px;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+.standings-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.standings-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.standings-panel::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.table-title {
+  font-size: 23px;
+  font-weight: 760;
+  letter-spacing: -0.045em;
+  margin-bottom: 15px;
+}
+
+.standings-head,
+.standing-row {
+  display: grid;
+  grid-template-columns: 42px 1fr 78px 48px;
+  gap: 10px;
+  align-items: center;
+}
+
+.standings-head {
+  color: var(--muted);
+  margin-bottom: 10px;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+}
+
+.standing-row {
+  position: relative;
+  overflow: hidden;
+  padding: 9px 10px;
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018));
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  margin-bottom: 7px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.84);
+  font-weight: 760;
+  font-size: 13px;
+  transition:
+    opacity 0.18s ease,
+    background 0.18s ease,
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.standing-row::before {
+  content: "";
+  position: absolute;
+  inset: auto 18px -18px 18px;
+  height: 28px;
+  background: radial-gradient(ellipse at center, var(--team-color, transparent), transparent 72%);
+  filter: blur(14px);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.standing-row:hover {
+  transform: translateX(3px);
+  border-color: color-mix(in srgb, var(--team-color, #ffffff) 34%, transparent);
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--team-color, #ffffff) 16%, transparent),
+      rgba(255, 255, 255, 0.055)
+    );
+  box-shadow:
+    0 14px 36px rgba(0, 0, 0, 0.32),
+    0 0 22px color-mix(in srgb, var(--team-color, #ffffff) 12%, transparent);
+}
+
+.standing-row:hover::before {
+  opacity: 0.26;
+}
+
+.standing-row.is-selected,
+.standing-row.selected {
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--team-color) 25%, transparent),
+      rgba(255, 255, 255, 0.08)
+    );
+  outline: 1px solid color-mix(in srgb, var(--team-color) 52%, transparent);
+  box-shadow:
+    0 0 28px color-mix(in srgb, var(--team-color) 16%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.standing-row.is-selected::before,
+.standing-row.selected::before {
+  opacity: 0.34;
+}
+
+.driver-code {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.driver-code i {
+  width: 3px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--team-color);
+  box-shadow: 0 0 12px var(--team-color);
+}
+
+/* =========================================
+   TYRES
+========================================= */
+
+.tyre {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 900;
+  box-shadow:
+    0 0 13px currentColor,
+    inset 0 0 10px rgba(255, 255, 255, 0.08);
+}
+
+.tyre.SOFT,
+.tyre.S {
+  color: var(--red);
+}
+
+.tyre.MEDIUM,
+.tyre.M {
+  color: var(--yellow);
+}
+
+.tyre.HARD,
+.tyre.H {
+  color: #fff;
+}
+
+.tyre.INTERMEDIATE,
+.tyre.I {
+  color: var(--green);
+}
+
+.tyre.WET,
+.tyre.W {
+  color: #4aa8ff;
+}
+
+/* =========================================
+   MAP PANEL
+========================================= */
+
+.map-panel {
+  position: relative;
+  overflow: hidden;
+  padding: 11px;
+  background:
+    radial-gradient(circle at 50% 112%, rgba(255, 106, 26, 0.16), transparent 46%),
+    radial-gradient(circle at 16% 12%, rgba(86, 199, 255, 0.08), transparent 32%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.008)),
+    rgba(4, 5, 7, 0.42);
+  border-radius: var(--radius-lg);
+}
+
+.map-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.026) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.026) 1px, transparent 1px);
+  background-size: 74px 74px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 0 80px rgba(255, 255, 255, 0.025),
+    inset 0 -48px 90px rgba(255, 106, 26, 0.055);
+  opacity: 1;
+}
+
+.map-panel::after {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -42px;
+  height: 92px;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(255, 106, 26, 0.24), transparent 72%);
+  filter: blur(26px);
+  opacity: 0.85;
+  z-index: 1;
+}
+
+.track-svg {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 22px;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Remove apenas fundos sólidos diretos do SVG, sem afetar labels dos carros */
+.track-svg > rect,
+.track-svg > rect:first-child,
+.track-svg > .track-bg,
+.track-svg > .map-bg,
+.track-svg > .svg-bg,
+.track-svg > .background,
+.track-svg > .track-background {
+  fill: transparent !important;
+  stroke: transparent !important;
+  opacity: 0 !important;
+}
+
+/* Remove textos fixos do mapa, sem afetar textos dos carros */
+.track-svg > text,
+.track-svg .map-label,
+.track-svg .placeholder-text,
+.track-svg .empty-text,
+.track-svg .loading-text,
+.track-svg .map-placeholder {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.terrain-lines path {
+  fill: none;
+  stroke: rgba(86, 199, 255, 0.07);
+  stroke-width: 2;
+}
+
+.terrain-blocks .grass {
+  fill: rgba(0, 255, 120, 0.018);
+}
+
+.terrain-blocks .grass.dark {
+  fill: rgba(0, 0, 0, 0.035);
+}
+
+.terrain-blocks .water {
+  fill: rgba(86, 199, 255, 0.055);
+}
+
+.terrain-blocks .service {
+  fill: rgba(255, 255, 255, 0.018);
+}
+
+.terrain-blocks .service.small {
+  fill: rgba(255, 255, 255, 0.014);
+}
+
+.tree-dots circle {
+  fill: rgba(0, 255, 120, 0.08);
+  filter: drop-shadow(0 0 8px rgba(0, 255, 120, 0.12));
+}
+
+.race-track {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.race-track.shadow {
+  stroke: rgba(0, 0, 0, 0.72);
+  stroke-width: 94;
+  filter: blur(14px);
+}
+
+.race-track.outer {
+  stroke: rgba(238, 245, 250, 0.94);
+  stroke-width: 74;
+  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.12));
+}
+
+.race-track.mid {
+  stroke: #272b31;
+  stroke-width: 58;
+}
+
+.race-track.inner {
+  stroke: #16191f;
+  stroke-width: 48;
+}
+
+.racing-line {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.28);
+  stroke-width: 2;
+  stroke-dasharray: 2 16;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.16));
+}
+
+.curbs path {
+  fill: none;
+  stroke: #ff4057;
+  stroke-width: 12;
+  stroke-dasharray: 10 16;
+  stroke-linecap: butt;
+  filter: drop-shadow(0 0 8px rgba(255, 64, 87, 0.26));
+}
+
+.pit-lane {
+  fill: none;
+  stroke: rgba(200, 208, 216, 0.66);
+  stroke-width: 12;
+  stroke-linecap: round;
+  opacity: 0.92;
+}
+
+.start-line {
+  stroke: #ffffff;
+  stroke-width: 5;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.32));
+}
+
+/* =========================================
+   CAR GROUPS AND MARKERS
+========================================= */
+
+.car-group {
+  cursor: pointer;
+  transition: opacity 0.22s ease, filter 0.22s ease;
+}
+
+.car-group.dimmed {
+  opacity: 0.12;
+  filter: grayscale(1);
+}
+
+.car-group.hidden {
+  display: none;
+}
+
+.car-group.selected .car-label-bg {
+  stroke: rgba(255, 255, 255, 0.78);
+  stroke-width: 1.8;
+}
+
+.car-sprite {
+  overflow: visible;
+  pointer-events: none;
+}
+
+.car-asset-wrap {
+  pointer-events: none;
+}
+
+.car-icon-shadow {
+  fill: rgba(0, 0, 0, 0.56);
+  opacity: 0.5;
+}
+
+.car-body {
+  fill: var(--team-color);
+  stroke: rgba(255, 255, 255, 0.56);
+  stroke-width: 0.9;
+  filter: drop-shadow(0 0 8px var(--team-color));
+}
+
+.car-wing,
+.car-cockpit {
+  fill: #0c0e12;
+  stroke: rgba(255, 255, 255, 0.34);
+  stroke-width: 0.6;
+}
+
+.car-wheel {
+  fill: #050608;
+  stroke: rgba(255, 255, 255, 0.24);
+  stroke-width: 0.55;
+}
+
+.car-label {
+  pointer-events: none;
+}
+
+.car-label-bg {
+  fill: rgba(8, 9, 11, 0.88);
+  stroke: rgba(255, 255, 255, 0.17);
+  stroke-width: 1;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.44));
+}
+
+.car-label-chip {
+  fill: var(--team-color);
+}
+
+.car-label-text,
+.car-label-pos {
+  fill: #ffffff;
+  font-weight: 900;
+  font-size: 13px;
+  dominant-baseline: middle;
+}
+
+.car-label-text {
+  text-anchor: middle;
+}
+
+.car-label-pos {
+  font-size: 12px;
+  text-anchor: middle;
+}
+
+.car-marker {
+  cursor: pointer;
+  transition: opacity 0.18s ease, filter 0.18s ease;
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform, opacity, filter;
+}
+
+.car-marker image {
+  pointer-events: none;
+  filter:
+    drop-shadow(0 9px 10px rgba(0, 0, 0, 0.52))
+    drop-shadow(0 0 12px var(--team-color));
+}
+
+.car-marker-glow {
+  opacity: 0.28;
+  filter: blur(6px);
+}
+
+.car-marker-dot {
+  stroke: rgba(255, 255, 255, 0.92);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 8px var(--team-color));
+}
+
+.car-marker.is-selected .car-marker-dot {
+  r: 8;
+  filter: drop-shadow(0 0 14px var(--team-color));
+}
+
+.car-marker .car-label rect:first-child {
+  fill: rgba(7, 8, 10, 0.9);
+  stroke: rgba(255, 255, 255, 0.15);
+  stroke-width: 1;
+}
+
+.car-marker.is-selected .car-label rect:first-child {
+  stroke: var(--team-color);
+  stroke-width: 1.8;
+  filter: drop-shadow(0 0 12px var(--team-color));
+}
+
+.car-marker .car-label-text {
+  fill: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
+  dominant-baseline: middle;
+}
+
+[data-team-filter-mode="dim"] .standing-row.is-filtered,
+[data-team-filter-mode="dim"] .car-marker.is-filtered {
+  opacity: 0.16;
+  filter: grayscale(1);
+}
+
+[data-team-filter-mode="hide"] .standing-row.is-filtered,
+[data-team-filter-mode="hide"] .car-marker.is-filtered {
+  display: none;
+}
+
+/* =========================================
+   DRIVER CARD
+========================================= */
+
+.driver-card {
+  position: relative;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow: hidden;
+}
+
+.driver-card::after {
+  content: "";
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: -36px;
+  height: 80px;
+  background: radial-gradient(ellipse at center, var(--team-color, transparent), transparent 72%);
+  filter: blur(24px);
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+.driver-head {
+  display: grid;
+  grid-template-columns: 62px 1fr 74px;
+  align-items: center;
+  gap: 12px;
+}
+
+.driver-position {
+  width: 62px;
+  height: 62px;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.34), transparent 40%),
+    var(--team-color);
+  display: grid;
+  place-items: center;
+  color: #050505;
+  font-size: 32px;
+  font-weight: 900;
+  box-shadow:
+    0 0 26px color-mix(in srgb, var(--team-color) 42%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.26);
+}
+
+.driver-head h3 {
+  font-size: 42px;
+  line-height: 0.95;
+  font-weight: 760;
+  letter-spacing: -0.055em;
+}
+
+.driver-head p {
+  color: var(--muted);
+  font-weight: 760;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-top: 5px;
+  letter-spacing: 0.08em;
+}
+
+.portrait {
+  position: relative;
+  width: 74px;
+  height: 74px;
+  min-width: 74px;
+  min-height: 74px;
+  max-width: 74px;
+  max-height: 74px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  flex: 0 0 74px;
+  background:
+    radial-gradient(circle at 45% 20%, rgba(255, 255, 255, 0.26), transparent 32%),
+    var(--team-color);
+  box-shadow:
+    inset 0 0 0 3px rgba(255, 255, 255, 0.14),
+    0 0 26px color-mix(in srgb, var(--team-color) 32%, transparent),
+    0 16px 34px rgba(0, 0, 0, 0.42);
+}
+
+.portrait-img {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: 50%;
+  display: block;
+}
+
+.portrait-fallback {
+  display: grid;
+  place-items: center;
+}
+
+.portrait-fallback-text {
+  position: relative;
+  z-index: 2;
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* =========================================
+   DRIVER CARD HEADER DYNAMIC
+========================================= */
+
+.driver-card-header {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 16px;
+  align-items: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.085);
+}
+
+.driver-photo-wrap {
+  width: 92px;
+  height: 92px;
+  border-radius: 26px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 35% 18%, rgba(255, 255, 255, 0.18), transparent 34%),
+    var(--driver-color, var(--team-color, var(--green)));
+  box-shadow:
+    inset 0 0 0 3px rgba(255, 255, 255, 0.1),
+    0 0 34px color-mix(in srgb, var(--driver-color, var(--team-color, var(--green))) 28%, transparent),
+    0 18px 38px rgba(0, 0, 0, 0.38);
+}
+
+.driver-photo-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+.driver-photo-wrap span {
+  color: #fff;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.driver-card-header span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.driver-card-header h2 {
+  margin-top: 6px;
+  font-size: clamp(28px, 2vw, 38px);
+  line-height: 0.93;
+  letter-spacing: -0.055em;
+  font-weight: 760;
+}
+
+.driver-card-header strong {
+  display: block;
+  margin-top: 9px;
+  color: var(--driver-color, var(--team-color, var(--green)));
+  font-size: 13px;
+  font-weight: 850;
+  text-shadow: 0 0 18px color-mix(in srgb, var(--driver-color, var(--team-color, var(--green))) 42%, transparent);
+}
+
+/* =========================================
+   STATS GRIDS
+========================================= */
+
+.timing-mini {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+
+.timing-mini article,
+.speed-grid article,
+.lap-grid article,
+.driver-stats article {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  padding: 14px;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 50% 115%, rgba(255, 106, 26, 0.11), transparent 62%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.062), rgba(255, 255, 255, 0.018));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.075),
+    0 12px 32px rgba(0, 0, 0, 0.24);
+}
+
+.timing-mini small,
+.speed-grid small,
+.lap-grid small,
+.driver-stats small {
+  color: var(--muted);
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+}
+
+.speed-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr 1fr;
+  gap: 10px;
+}
+
+.speed-grid strong {
+  font-size: 42px;
+  line-height: 0.95;
+  font-weight: 760;
+  letter-spacing: -0.055em;
+}
+
+.speed-grid em {
+  display: block;
+  color: var(--muted);
+  font-style: normal;
+  font-weight: 850;
+  font-size: 10px;
+  margin-top: 7px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.drs-on strong {
+  color: var(--green);
+  font-size: 26px;
+  text-shadow: 0 0 22px rgba(0, 210, 106, 0.3);
+}
+
+.lap-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.lap-grid strong {
+  font-size: 18px;
+  font-weight: 780;
+}
+
+.driver-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.driver-stats strong {
+  display: block;
+  font-size: 18px;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.empty-driver-card {
+  color: var(--muted);
+  font-weight: 750;
+  line-height: 1.5;
+}
+
+/* =========================================
+   BOTTOM DASHBOARD
+========================================= */
+
+.bottom-dashboard {
+  min-height: 112px;
+}
+
+.status-grid {
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 12px;
+}
+
+.status-grid article {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background:
+    radial-gradient(circle at 50% 115%, rgba(255, 106, 26, 0.12), transparent 62%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.058), rgba(255, 255, 255, 0.018));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.075),
+    0 12px 34px rgba(0, 0, 0, 0.24);
+}
+
+.status-grid strong {
+  display: block;
+  margin-top: 5px;
+  font-weight: 780;
+}
+
+.status-grid em {
+  display: block;
+  color: var(--muted);
+  font-style: normal;
+  margin-top: 3px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-icon,
+.track-mini,
+.tyre-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 2px solid currentColor;
+  flex: 0 0 auto;
+  box-shadow:
+    0 0 20px currentColor,
+    inset 0 0 14px rgba(255, 255, 255, 0.08);
+}
+
+.tyre-icon {
+  color: var(--yellow);
+}
+
+.track-mini::before {
+  content: "";
+  width: 22px;
+  height: 30px;
+  border: 4px solid currentColor;
+  border-left-color: transparent;
+  border-radius: 48% 52% 48% 52%;
+  transform: rotate(28deg);
+}
+
+/* =========================================
+   OPENF1 DYNAMIC CONNECTIONS
+========================================= */
+
+.openf1-status-message {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  z-index: 9999;
+  transform: translateX(-50%);
+  max-width: min(720px, calc(100vw - 28px));
+  padding: 12px 17px;
+  border-radius: 999px;
+  color: #ffffff;
+  background:
+    radial-gradient(circle at 50% 100%, rgba(255, 106, 26, 0.13), transparent 72%),
+    rgba(8, 8, 10, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 0 32px rgba(255, 106, 26, 0.12),
+    0 18px 54px rgba(0, 0, 0, 0.52),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  font-size: 13px;
+  font-weight: 750;
+  text-align: center;
+  backdrop-filter: blur(18px) saturate(130%);
+}
+
+.openf1-status-message[hidden] {
+  display: none;
+}
+
+.openf1-status-message[data-type="error"] {
+  border-color: rgba(255, 64, 87, 0.58);
+  box-shadow:
+    0 0 0 3px rgba(255, 64, 87, 0.08),
+    0 0 32px rgba(255, 64, 87, 0.16),
+    0 18px 54px rgba(0, 0, 0, 0.52);
+}
+
+.openf1-status-message[data-type="loading"]::before {
+  content: "";
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 14px var(--green);
+  animation: pulseDot 0.8s infinite alternate;
+}
+
+@keyframes pulseDot {
+  from {
+    opacity: 0.28;
+    transform: scale(0.78);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* =========================================
+   EMBEDDED F1 CAR
+========================================= */
+
+.embedded-f1-car,
+.car-marker-car,
+.fallback-car {
+  pointer-events: none;
+}
+
+.embedded-f1-car {
+  overflow: visible;
+  filter:
+    drop-shadow(0 9px 10px rgba(0, 0, 0, 0.52))
+    drop-shadow(0 0 10px var(--team-color));
+}
+
+/* =========================================
+   HISTORICAL REAL-TIME SIMULATION
+========================================= */
+
+body.simulation-mode #loadHistoryBtn {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.36), transparent 38%),
+    linear-gradient(180deg, #20e070, #087a39);
+  border-color: rgba(32, 224, 112, 0.38);
+  box-shadow:
+    0 0 30px rgba(32, 224, 112, 0.28),
+    0 14px 34px rgba(32, 224, 112, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.openf1-status-message[data-type="sim"] {
+  border-color: rgba(32, 224, 112, 0.42);
+  box-shadow:
+    0 0 0 3px rgba(32, 224, 112, 0.08),
+    0 0 30px rgba(32, 224, 112, 0.14),
+    0 18px 54px rgba(0, 0, 0, 0.52);
+}
+
+.openf1-status-message[data-type="sim"]::before {
+  content: "";
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 14px var(--green);
+  animation: pulseDot 0.8s infinite alternate;
+}
+
+body.simulation-mode .car-marker-glow {
+  opacity: 0.36;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1500px) {
+  .top-dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .history-panel {
+    grid-template-columns: repeat(3, 1fr) auto;
+  }
+
+  .main-dashboard {
+    grid-template-columns: 260px minmax(0, 1fr) 300px;
+  }
+}
+
+@media (max-width: 1100px) {
+  html,
+  body {
+    overflow: auto;
+  }
+
+  .app-shell {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .main-dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .map-panel {
+    min-height: 560px;
+  }
+
+  .status-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .driver-card-header {
+    grid-template-columns: 74px 1fr;
+  }
+
+  .driver-photo-wrap {
+    width: 74px;
+    height: 74px;
+    border-radius: 22px;
+  }
+
+  .driver-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .app-shell {
+    padding: 8px;
+    gap: 10px;
+  }
+
+  .panel {
+    border-radius: 22px;
+  }
+
+  .brand-panel {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .history-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .weather-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .top-metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .speed-grid,
+  .timing-mini,
+  .lap-grid {
+    grid-template-columns: 1fr;
+  }
+}

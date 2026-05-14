@@ -1,0 +1,83 @@
+<div class="page-grid custom-race-page-grid">
+  <section class="panel page-hero custom-race-hero">
+    <span class="page-kicker">Skill equalizer</span>
+    <h2>Corrida customizada</h2>
+    <p>Monte uma corrida justa para comparar habilidade: escolha ano, pista, pilotos, carro de cada piloto e condições climáticas. A tela usa dados dinâmicos da base normalizada e prepara o cenário para o motor de simulação.</p>
+  </section>
+
+  <section class="panel page-section custom-race-config">
+    <div class="section-title">
+      <span>Configuração da corrida</span>
+      <h3>Cenário base</h3>
+    </div>
+
+    <div class="custom-form-grid">
+      <label>Ano da temporada
+        <select id="custom-race-year" class="glass-input"></select>
+      </label>
+
+      <label>Pista
+        <select id="custom-race-circuit" class="glass-input"></select>
+      </label>
+
+      <label>Sessão
+        <select id="custom-race-session" class="glass-input">
+          <option value="race">Corrida</option>
+          <option value="sprint">Sprint</option>
+          <option value="quali">Classificação</option>
+          <option value="practice">Treino</option>
+        </select>
+      </label>
+
+      <label>Condição climática
+        <select id="custom-race-weather" class="glass-input">
+          <option value="dry">Seco</option>
+          <option value="mixed">Misto</option>
+          <option value="light-rain">Chuva leve</option>
+          <option value="heavy-rain">Chuva forte</option>
+          <option value="storm">Chuva extrema</option>
+        </select>
+      </label>
+
+      <label>Temperatura da pista
+        <select id="custom-race-track-temp" class="glass-input">
+          <option value="cold">Fria</option>
+          <option value="normal" selected>Normal</option>
+          <option value="hot">Quente</option>
+        </select>
+      </label>
+
+      <label>Modo de comparação
+        <select id="custom-race-balance" class="glass-input">
+          <option value="same-car">Todos no mesmo carro</option>
+          <option value="chosen-car">Carro escolhido por piloto</option>
+          <option value="era-normalized">Normalizar diferença de era</option>
+          <option value="team-context">Considerar contexto da equipe</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <section class="panel page-section custom-race-drivers wide">
+    <div class="section-title">
+      <span>Grid customizado</span>
+      <h3>Pilotos e carros</h3>
+    </div>
+
+    <div class="custom-race-actions">
+      <button id="custom-add-driver" class="tactile-action" type="button">Adicionar piloto</button>
+      <button id="custom-reset-grid" class="tactile-action secondary" type="button">Resetar grid</button>
+    </div>
+
+    <div id="custom-driver-grid" class="custom-driver-grid"></div>
+  </section>
+
+  <section class="panel page-section custom-race-output wide">
+    <div class="section-title">
+      <span>Leitura estatística</span>
+      <h3>Resumo da comparação</h3>
+    </div>
+
+    <div id="custom-race-summary" class="custom-race-summary"></div>
+  </section>
+</div>

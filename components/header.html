@@ -1,0 +1,78 @@
+<header class="top-dashboard panel">
+
+  <section class="brand-panel">
+    <div>
+      <h1 id="raceTitle">Nenhuma corrida selecionada</h1>
+
+      <p id="raceSubtitle">
+        Plataforma histórica, estatística e simulada da Fórmula 1.
+      </p>
+    </div>
+
+  
+  </section>
+
+  <section class="history-panel">
+
+    <div class="history-control">
+      <label for="yearSelect">Ano</label>
+
+      <select id="yearSelect">
+        <option value="">Selecionar ano</option>
+      </select>
+    </div>
+
+    <div class="history-control">
+      <label for="trackSelect">Pista</label>
+
+      <select id="trackSelect" disabled>
+        <option value="">Selecionar pista</option>
+      </select>
+    </div>
+
+    <div class="history-control">
+      <label for="sessionSelect">Sessão</label>
+
+      <select id="sessionSelect" disabled>
+        <option value="">Selecionar sessão</option>
+      </select>
+    </div>
+
+    <button id="loadHistoryBtn" type="button" disabled>
+      Visualizar
+    </button>
+
+  </section>
+
+  <section class="weather-panel">
+
+    <article>
+      <b>☁</b>
+
+      <div>
+        <strong id="weather-air-temp">-</strong>
+        <span>Clima</span>
+      </div>
+    </article>
+
+    <article>
+      <b>💧</b>
+
+      <div>
+        <strong id="weather-humidity">-</strong>
+        <span>Umidade</span>
+      </div>
+    </article>
+
+    <article>
+      <b>≋</b>
+
+      <div>
+        <strong id="weather-wind">-</strong>
+        <span>Vento</span>
+      </div>
+    </article>
+
+  </section>
+
+</header>

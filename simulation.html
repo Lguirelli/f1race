@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulador | F1 Historical Intelligence</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./styles-platform.css" />
+</head>
+
+<body data-page="simulation">
+  <div data-component="./components/floating-menu.html"></div>
+
+  <main class="app-shell platform-page-shell">
+    <section id="page-simulation" class="platform-page is-active" data-component="./components/pages/simulation-page.html"></section>
+  </main>
+
+  <script type="module">
+    async function loadComponent(node) {
+      const path = node.getAttribute('data-component');
+      const response = await fetch(path);
+      if (!response.ok) throw new Error(`Erro ao carregar componente: ${path}`);
+      node.outerHTML = await response.text();
+    }
+
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.defer = true;
+        script.onload = resolve;
+        script.onerror = () => reject(new Error(`Erro ao carregar ${src}`));
+        document.body.appendChild(script);
+      });
+    }
+
+    try {
+      await Promise.all(Array.from(document.querySelectorAll('[data-component]')).map(loadComponent));
+      await loadScript('./js/floating-menu.js');
+      await loadScript('./js/local-database.js');
+      await loadScript('./js/platform-data.js');
+      await loadScript('./js/platform-pages.js');
+    } catch (error) {
+      document.body.innerHTML = `<pre style="color:white;background:#050b12;padding:24px;font-family:monospace;white-space:pre-wrap">Erro ao carregar a página:\n${error.stack || error.message}</pre>`;
+      console.error(error);
+    }
+  </script>
+</body>
+</html>
